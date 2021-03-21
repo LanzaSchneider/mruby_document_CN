@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <title>编译配置选项</title> 
+  <meta name="theme-color" content="#e0115f" /> 
+  <!-- Favicon --> 
+  <link rel="icon" type="image/x-icon" href="http://mruby.org/favicon.ico" /> 
+  <link rel="apple-touch-icon" sizes="180x180" href="http://mruby.org/assets/images/icons/apple-touch-icon.png" /> 
+  <link rel="icon" type="image/png" sizes="32x32" href="http://mruby.org/assets/images/icons/favicon-32x32.png" /> 
+  <link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png" /> 
+  <link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest" /> 
+  <!-- Bootstrap CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" /> 
+  <!-- Latest compiled and minified JavaScript --> 
+  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js.download" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> 
+  <script src="./mruby_site_files/bootstrap.bundle.min.js.download" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script> 
+  <!-- syntax highlighting CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/syntax.css" /> 
+  <!-- Custom CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/main.css" /> 
+  <link type="text/css" rel="stylesheet" charset="UTF-8" href="./mruby_site_files/translateelement.css" />
+ </head> 
+ <body> 
+  <nav class="navbar navbar-expand-md navbar-header navbar-mruby
+            justify-content-between pt-0" role="navigation"> 
+   <a href="http://mruby.org/"> <img src="./mruby_site_files/mruby_header.png" alt="mruby" title="mruby" /> </a> 
+   <div> 
+    <ul class="nav navbar-nav"> 
+     <li class="nav-item"> <a href="executing-ruby-code-with-mruby.html" class="nav-link">用mruby执行Ruby代码</a> </li> 
+	 <li class="nav-item"> <a href="docs_compile.html" class="nav-link">编译指南</a> </li> 
+	 <li class="nav-item"> <a href="docs_mrbconf.html" class="nav-link">编译配置选项</a> </li> 
+    </ul> 
+   </div> 
+  </nav> 
+  <div class="container"> 
+   <div class="row clearfix"> 
+    <div class="col-md-12 column"> 
+     <h1 id="executing-ruby-code-with-mruby">编译配置选项</h1> 
+	 <p>译者<a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p>
+		<p>通过修改`mrbconf.h`文件中的宏定义，我们可以配置mruby的一些构建选项</p>
+		<h2>如何修改这些宏定义</h2>
+		<p>* 直接编辑`mrbconf.h`</p>
+		<p>这样的方式在你有多个构建配置(比如很多交叉编译平台)的情况下很有用，因为你做出的修改会影响到所有的构建配置</p>
+		<p>另外，很多选项已经在该文件内写好了，你可以通过注释或解除注释来轻松地控制它们</p>
+		<p>* 传递编译器flags(或defines)</p>
+		<p>请确保向所有编译器传递了相同的设置</p>
+		<h2>stdio 设置 —— `MRB_NO_STDIO`</h2>
+		<p>* 如果你不需要启用任何<stdio.h>函数，就可以用这个设置</p>
+		<p>* 一些功能可能会因此受到影响，比如：</p>
+		<p>`mrb_irep`(也就是字节码)转储到文件，或者从文件加载将会不可用</p>
+		<p>编译Ruby源代码文件</p>
+		<p>一些src/print.c里定义的print行为</p>
+		<h2>DEBUG 宏</h2>
+		<p>`MRB_USE_DEBUG_HOOK`</p>
+		<p>* 用于调试的HOOK函数将会启用</p>
+		<p>* 任何OP(就是mruby虚拟机的指令)执行前都会调用fetch hook</p>
+		<p>* 另外还有专用于调试用途的特殊指令`OP_DEBUG`，它会调用Debug OP hook</p>
+		<p>`MRB_DEBUG`</p>
+		<p>* `mrb_assert`宏将会启用</p>
+		<p>* 配置文件当中调用`enable_debug`时也会启用该宏</p>
+		<h2>栈配置</h2>
+		<p>`MRB_STACK_EXTEND_DOUBLING`</p>
+		<p>* 将会启用两倍的mruby栈空间</p>
+		<p>`MRB_STACK_GROWTH`</p>
+		<p>* 默认值128</p>
+		<p>* 这个值用于mruby栈空间的扩展量</p>
+		<p>* 启用`MRB_STACK_EXTEND_DOUBLING`时，该选项无效化</p>
+		<p>`MRB_STACK_MAX`</p>
+		<p>* 默认值是(0x40000 - MRB_STACK_GROWTH)</p>
+		<p>* 如果mruby栈空间消耗超出这个限度，就会抛出`RuntimeError`</p>
+		<h2>基本类型的设置</h2>
+		<p>`MRB_USE_FLOAT32`</p>
+		<p>* 如启用该设置，`mrb_float`的值将会采用float型作为实体，否则将会采用double型</p>
+		<p>`MRB_NO_FLOAT`</p>
+		<p>* 如启用该设置，mruby将会去除浮点数功能</p>
+		<p>* 这可以用于一些特殊场合，比如没有FPU的微控制器，或是不需要浮点数的OS内核部分</p>
+		<p>`MRB_INT32`</p>
+		<p>* 如启用该设置，mrb_int将会采用int32_t作为实体</p>
+		<p>`MRB_INT64`</p>
+		<p>* 如启用该设置，mrb_int将会采用int64_t作为实体</p>
+		<p>注：`MRB_INT32`和`MRB_INT64`是不兼容的(很显然吧)</p>
+		<h2>垃圾收集器(GC)设置</h2>
+		<p>`MRB_GC_STRESS`</p>
+		<p>* 如启用该设置，每次`RBasic`对象分配时，都会触发一次full GC</p>
+		<p>* 主要用于内存管理的调试</p>
+		<p>`MRB_GC_TURN_OFF_GENERATIONAL`</p>
+		<p>* 用于关闭增量GC</p>
+		<p>(译者注：这一点和lua不同，lua默认不开启增量GC，但是mruby却很自信地默认开启了)</p>
+		<p>`MRB_GC_FIXED_ARENA`</p>
+		<p>* 如启用该设置，GC arena将采用固定大小</p>
+		<p>* 固定大小的情况下，GC arena的消耗超出`MRB_GC_ARENA_SIZE`时将会抛出`RuntimeError`</p>
+		<p>* 这在追踪不必要的对象分配时很有用</p>
+		<p>`MRB_GC_ARENA_SIZE`</p>
+		<p>* 默认值100</p>
+		<p>* 指定了GC arena的大小，当然如果没有启用`MRB_GC_FIXED_ARENA`的话，这个设置就没用了</p>
+		<p>`MRB_HEAP_PAGE_SIZE`</p>
+		<p>* 默认值1024</p>
+		<p>* 指定每个堆页面的`RBasic`对象数目</p>
+		<h2>内存池配置</h2>
+		<p>`POOL_ALIGNMENT`</p>
+		<p>* 默认值4</p>
+		<p>* 这和内存对齐有关，如果你要分配一个需要超出默认值所指定的对齐范围的对象，则应该指定所需要的最大值</p>
+		<p>`POOL_PAGE_SIZE`</p>
+		<p>* 默认值16000</p>
+		<p>* 指定内存池页面的页面大小</p>
+		<p>* 更小的值会导致更大的内存开销</p>
+		<h2>`mrb_value`配置(译者注：mrb_value就是用于维护mruby值的结构，它具有变体的特征)</h2>
+		<p>`MRB_ENDIAN_BIG`</p>
+		<p>* 如启用该设置，将会使mruby在大端模式下编译</p>
+		<p>* `MRB_NAN_BOXING`用到该配置</p>
+		<p>* 一些mrbgem会用到这个配置</p>
+		<p>`MRB_NAN_BOXING`</p>
+		<p>* 如启用该设置，`mrb_value`将会被封装在一个double型值中</p>
+		<p>* `MRB_USE_FLOAT32`和`MRB_NO_FLOAT`不兼容该配置</p>
+		<p>`MRB_WORD_BOXING`</p>
+		<p>* 如启用该设置，`mrb_value`将会被封装在一个word里(具体的大小和平台的word应该有关系，但通常还是32位)</p>
+		<p>* 这种设置下，浮点数将不会是`mrb_value`变体当中的一个成分，而是以一个RBasic对象的形式维护</p>
+		<h2>其他配置</h2>
+		<p>`MRB_UTF8_STRING`</p>
+		<p>* 对字符串启用UTF-8支持，如果不启用，就只有ASCII编码了</p>
+		<p>`MRB_FUNCALL_ARGC_MAX`</p>
+		<p>* 默认值16</p>
+		<p>* 指定`mrb_funcall`的第4个参数argc的最大值</p>
+		<p>* 如果argc超出该值，将会抛出`ArgumentError`</p>
+		<p>`KHASH_DEFAULT_SIZE`</p>
+		<p>* 默认值32</p>
+		<p>* 指定khash的默认桶数目</p>
+		<p>`MRB_NO_METHOD_CACHE`</p>
+		<p>* 关闭方法缓存，节省内存(牺牲执行效率)</p>
+		<p>`MRB_METHOD_CACHE_SIZE`</p>
+		<p>* 默认256</p>
+		<p>* `MRB_NO_METHOD_CACHE`如果已经启用，则该设置无效化</p>
+		<p>* 必须是2的幂</p>
+		<p>`MRB_USE_METHOD_T_STRUCT`</p>
+		<p>* 用一个C结构体来作`mrb_method_t`</p>
+		<p>* 如果不启用的话，需要函数指针的最高2位为0</p>
+		<p>* 在需要用到函数指针高位的平台上，应该开启该配置</p>
+		<p>`MRB_USE_ALL_SYMBOLS`</p>
+		<p>* 使`mrbgems/mruby-symbol-ext`中的`Symbol.all_symbols`功能可用</p>
+		<p>* 将会增加堆内存的开销</p>
+    </div> 
+   </div> 
+  </div> 
+  <div class="goog-te-spinner-pos">
+   <div class="goog-te-spinner-animation">
+    <svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px" height="96px" viewbox="0 0 66 66">
+     <circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
+   </div>
+  </div>
+ </body>
+</html>
