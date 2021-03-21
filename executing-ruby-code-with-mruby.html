@@ -2,7 +2,7 @@
 <html class="">
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-  <title>用mruby执行Ruby代码</title> 
+  <title>用 mruby 执行 Ruby 代码</title> 
   <meta name="theme-color" content="#e0115f" /> 
   <!-- Favicon --> 
   <link rel="icon" type="image/x-icon" href="http://mruby.org/favicon.ico" /> 
@@ -11,10 +11,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png" /> 
   <link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest" /> 
   <!-- Bootstrap CSS --> 
-  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" /> 
+  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" /> 
   <!-- Latest compiled and minified JavaScript --> 
-  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js.download" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> 
-  <script src="./mruby_site_files/bootstrap.bundle.min.js.download" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script> 
+  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js"></script> 
+  <script src="./mruby_site_files/bootstrap.bundle.min.js"></script> 
   <!-- syntax highlighting CSS --> 
   <link rel="stylesheet" href="./mruby_site_files/syntax.css" /> 
   <!-- Custom CSS --> 
@@ -36,8 +36,8 @@
   <div class="container"> 
    <div class="row clearfix"> 
     <div class="col-md-12 column"> 
-     <h1 id="executing-ruby-code-with-mruby">用mruby执行Ruby代码</h1> 
-     <p><strong>原作者 <a href="http://bovensiepen.net/">Daniel Bovensiepen</a> 译者<a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p> 
+     <h1 id="executing-ruby-code-with-mruby">用 mruby 执行 Ruby 代码</h1> 
+     <p><strong>原作者 <a href="http://bovensiepen.net/">Daniel Bovensiepen</a> 译者 <a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p> 
      <p>通常，我们使用Ruby程序的方式都是直接将源代码分发，并且安装一个有着众多文件的Ruby解释器以执行那些Ruby源代码。因此，如果您有使用其它Ruby实现的经验，那么您可能会对下面列出的一些例子感到熟悉。但mruby不仅能以这种方式运行，还可以构建出独立的程序，甚至可以把Ruby源代码编译成字节码来储存，并在合适的时机加载执行。</p> 
      <p>我们假设现在有一个Ruby源代码文件 <code class="language-plaintext highlighter-rouge">test_program.rb</code> 它的内容是：</p> 
      <div class="language-ruby highlighter-rouge">
@@ -233,7 +233,7 @@ hello world
      <p>✘ 需要照抄上面的样板才能去编程和执行</p> 
      <p>✘ 如果要更新mruby字节码需要重新编译，或者是其它的更新机制</p> 
      <h2 id="fazit">总结</h2> 
-     <p><strong>REPL(交互式解释器) (mirb)</strong>的方式主要用于早期开发过程。 <strong>Ruby源代码(.rb)</strong>是mruby的最常用用法，它将Ruby作为一种脚本来使用，可以轻松地修改程序内容。 而<strong>C源代码(.c)</strong>是将mruby嵌入到您自己应用程序中最简单的做法。 <strong>字节码(.mrb)</strong>用法则类似Java程序，可以基于文件来安装程序，但是不分发源代码。 <strong>字节码(C语言方式)(.c)</strong>对很多人来说可能是最复杂的一种使用mruby的方式，但是它也提供了在程序内嵌入mruby最有效的办法。(译者注：mruby自带的mrbgems机制就是使用该方式嵌入Ruby代码的)</p> 
+     <p><strong>REPL(交互式解释器) (mirb)</strong> 的方式主要用于早期开发过程。 <strong>Ruby 源代码 (.rb)</strong> 是 mruby 的最常用用法，它将 Ruby 作为一种脚本来使用，可以轻松地修改程序内容。 而 <strong>C 源代码 (.c)</strong> 是将 mruby 嵌入到您自己应用程序中最简单的做法。 <strong>字节码 (.mrb)</strong> 用法则类似 Java 程序，可以基于文件来安装程序，但是不分发源代码。 <strong>字节码 (C 语言方式) (.c)</strong> 对很多人来说可能是最复杂的一种使用 mruby 的方式，但是它也提供了在程序内嵌入 mruby 最有效的办法。(译者注：mruby 自带的 mrbgems 机制就是使用该方式嵌入 Ruby 代码的)</p> 
     </div> 
    </div> 
   </div> 
