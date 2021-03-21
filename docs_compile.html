@@ -11,10 +11,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png" /> 
   <link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest" /> 
   <!-- Bootstrap CSS --> 
-  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" /> 
+  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css"/> 
   <!-- Latest compiled and minified JavaScript --> 
-  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js.download" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> 
-  <script src="./mruby_site_files/bootstrap.bundle.min.js.download" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script> 
+  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js"></script> 
+  <script src="./mruby_site_files/bootstrap.bundle.min.js"></script> 
   <!-- syntax highlighting CSS --> 
   <link rel="stylesheet" href="./mruby_site_files/syntax.css" /> 
   <!-- Custom CSS --> 
@@ -37,213 +37,225 @@
    <div class="row clearfix"> 
     <div class="col-md-12 column"> 
      <h1 id="executing-ruby-code-with-mruby">编译指南</h1> 
-	 <p>译者<a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p>
-	 <p>mruby使用Rake来进行编译。</p>
+	 <p><strong>译者 <a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p>
+	 <p>mruby 使用 Rake 来进行编译。</p>
 	 <h2>一、准备工作</h2>
 	 <p>你需要准备下列工具：</p>
-	 <p>* 支持C99标准的C语言编译器套件，这包括链接器等(如gcc、clang)</p>
-	 <p>* Parser生成器(bison)</p>
-	 <p>* Ruby 至少2.0版本(ruby或jruby等都可)</p>
-	 <p>注意，MacOS自带的bison工具对编译mruby来说已经太老了，你需要用`brew install bison`并把它添加到$PATH，当然可以的话，也顺便把ruby更新一下吧。</p>
+	 <ul>
+	 	<li>支持 C99 标准的 C 语言编译器套件，这包括链接器等 (如 gcc、clang)</li>
+	 	<li>Parser 生成器 (bison)</li>
+	 	<li>Ruby 至少 2.0 版本 (ruby 或 jruby 等都可)</li>
+	 </ul>
+	 <p>注意，MacOS 自带的 bison 工具对编译 mruby 来说已经太老了，你需要用 <code>brew install bison</code> 并把它添加到 $PATH，当然可以的话，也顺便把 ruby 更新一下吧。</p>
 	 <p>非必须的工具：</p>
-	 <p>* git(便于更新mruby源代码，以及获取mrbgems)</p>
-	 <p>* C++编译器套件(用于支持含有C++代码的mrbgem)</p>
+	 <ul>
+	 <li>git (便于更新 mruby 源代码，以及获取 mrbgems)</li>
+	 <li>C++ 编译器套件 (用于支持含有 C++ 代码的 mrbgem)</li>
+	 </ul>
 	 <h2>二、编译</h2>
-	 <p>如果只是要用默认配置来编译mruby，那只要在mruby源代码目录下使用`rake`命令即可。如果要生成和运行测试工具，请用`rake test`；清除构建文件请用`rake clean`。要看所有的构建选项，请用`rake -v`。</p>
-	 <p>上面说的是默认配置，如果你想用其它的配置文件来构建mruby，可以用`MRUBY_CONFIG`环境变量来指定一个配置文件(也可以用`CONFIG`)，如果没有找到配置文件，就会转而使用`build_config/${MRUBY_CONFIG}.rb`作为配置文件。顺带一提，默认配置文件是`build_config/default.rb`。</p>
-	 <p>显然配置文件是一个Ruby源代码文件。它包含了用于构建mruby的配置对象。</p>
+	 <p>如果只是要用默认配置来编译 mruby，那只要在 mruby 源代码目录下使用 <code>rake</code> 命令即可。如果要生成和运行测试工具，请用 <code>rake test</code>；清除构建文件请用 <code>rake clean</code>。要看所有的构建选项，请用 <code>rake -v</code>。</p>
+	 <p>上面说的是默认配置，如果你想用其它的配置文件来构建 mruby，可以用 <code>MRUBY_CONFIG</code> 环境变量来指定一个配置文件 (也可以用 <code>CONFIG</code>)，如果没有找到配置文件，就会转而使用 <code>build_config/${MRUBY_CONFIG}.rb</code> 作为配置文件。顺带一提，默认配置文件是 <code>build_config/default.rb</code>。</p>
+	 <p>显然配置文件是一个 Ruby 源代码文件。它包含了用于构建 mruby 的配置对象。</p>
 	 <h2>三、构建配置</h2>
-	 <p>* 如果你在什么新的平台上构建mruby成功，请你把你的构建配置文件pull-request到mruby的repo</p>
+	 <ul>
+	 	<li>如果你在什么新的平台上构建 mruby 成功，请你把你的构建配置文件 pull-request 到 mruby 的 repo。</li>
+	 </ul>
 	 <h3>工具链</h3>
 	 <h4>GCC</h4>
-	 <p>要设置编译工具链为GCC，只需在构建中编写`conf.toolchain :gcc`即可</p>
+	 <p>要设置编译工具链为GCC，只需在构建中编写 <code>conf.toolchain :gcc</code> 即可</p>
 	 <h4>clang</h4>
-	 <p>和GCC差不多，写`conf.toolchain :clang`就行</p>
+	 <p>和GCC差不多，写 <code>conf.toolchain :clang</code> 就行</p>
 	 <h4>Visual Studio 2010/2012/2013</h4>
-	 <p>`conf.toolchain :visualcpp`</p>
+	 <p><code>conf.toolchain :visualcpp</code></p>
 	 <h4>Android</h4>
-	 <p>`conf.toolchain :android`</p>
-	 <p>构建Android平台的mruby，你需要Android NDK，以及NDK的toolchain path环境变量：`ANDROID_STANDALONE_TOOLCHAIN`</p>
+	 <p><code>conf.toolchain :android</code></p>
+	 <p>构建 Android 平台的 mruby，你需要 Android NDK，以及 NDK 的 toolchain path 环境变量：<code>ANDROID_STANDALONE_TOOLCHAIN</code></p>
 	 <h3>可执行程序</h3>
 	 <p>你可以设置需要构建出的mruby可执行程序，如：</p>
-	 <p>* mruby(mruby解释器程序)</p>
-	 <p>* mirb(mruby的REPL，交互式解释器)</p>
+	 <ul>
+		 <li>mruby(mruby解释器程序)</li>
+		 <li>mirb(mruby的REPL，交互式解释器)</li>
+	 </ul>
 	 <p>这部分的设置在mrbgems部分就完成了，请参见mrbgems部分。</p>
 	 <h3>文件目录分隔符</h3>
 	 <p>如果你在什么特殊的平台构建，可以自己指定文件目录分隔符，比如：</p>
-	 <p>`conf.file_separator = '/'`</p>
+	 <p><code>conf.file_separator = '/'</code></p>
 	 <h3>C语言编译器</h3>
-	 <p>conf.cc do |cc|</p>
-	 <p>cc.command = 'gcc' # 编译器命令</p>
-	 <p>cc.flags = ['-D_WIN32'] # 编译器的flags</p>
-	 <p>cc.include_paths = [] # 这里填入编译过程中的文件搜索目录</p>
-	 <p>cc.defines = [] # 这里是预定义</p>
-	 <p>cc.compile_options = [] # 这里是一些编译选项</p>
-	 <p>end</p>
+	 <pre><code class="language-rb">conf.cc do |cc|
+  cc.command = 'gcc'        # 编译器命令
+  cc.flags = ['-D_WIN32']   # 编译器的flags
+  cc.include_paths = []     # 这里填入编译过程中的文件搜索目录
+  cc.defines = []           # 这里是预定义
+  cc.compile_options = []   # 这里是一些编译选项
+end</code></pre>
 	 <h3>链接器</h3>
-	 <p>conf.linker do |linker|</p>
-	 <p>linker.command = ...# 链接器命令</p>
-	 <p>linker.flags = ... # 链接器flags</p>
-	 <p>linker.libraries = ... # 附加库名称</p>
-	 <p>linker.library_paths = .... # 附加库搜索目录</p>
-	 <p>linker.link_options = ... # 链接选项</p>
-	 <p>end</p>
+	 <pre><code class="language-rb">conf.linker do |linker|
+  linker.command = ...        # 链接器命令
+  linker.flags = ...          # 链接器flags
+  linker.libraries = ...      # 附加库名称
+  linker.library_paths = ...  # 附加库搜索目录
+  linker.link_options = ...   # 链接选项
+end</code></pre>
 	 <h3>归档器(Archiver, 就是把若干对象文件合并成静态库的工具)</h3>
-	 <p>conf.archiver do |archiver|</p>
-	 <p>archiver.command = ...# 归档器命令</p>
-	 <p>archiver.archive_options = ... # 归档选项</p>
-	 <p>end</p>
+	 <pre><code class="language-rb">conf.archiver do |archiver|
+  archiver.command = ...          # 归档器命令
+  archiver.archive_options = ...  # 归档选项
+end</code></pre>
 	 <h3>Parser生成器</h3>
-	 <p>conf.yacc do |yacc|</p>
-	 <p>yacc.command = ...# yacc命令</p>
-	 <p>yacc.compile_options = ... # 编译选项</p>
-	 <p>end</p>
+	 <pre><code class="language-rb">conf.yacc do |yacc|
+  yacc.command = ...          # yacc命令
+  yacc.compile_options = ...  # 编译选项
+end</code></pre>
 	 <h3>文件扩展名</h3>
-	 <p>conf.exts do |exts|</p>
-	 <p>exts.object = ...# 目标文件扩展名(一般是.o)</p>
-	 <p>exts.executable = ... # 可执行文件扩展名</p>
-	 <p>exts.library = ... # 静态库文件扩展名(一般是.a)</p>
-	 <p>end</p>
+	 <pre><code class="language-rb">conf.exts do |exts|
+  exts.object = ...     # 目标文件扩展名 (一般是 .o)
+  exts.executable = ... # 可执行文件扩展名
+  exts.library = ...    # 静态库文件扩展名 (一般是 .a)
+end</code></pre>
 	 <h3>预分配符号(Presym)</h3>
-	 <p>从mruby3.0起，一些ruby symbol将会被预先记录成presym，从而节省运行时的RAM开销……当然，如果出于一些原因，你想关闭这个功能的话，可以使用`conf.disable_presym`</p>
-	 <p>在构建过程当中，`mrbc`工具在交叉编译的环境下都会在该配置下被编译。</p>
-	 <h3>Mrbgems(mruby扩展包)</h3>
-	 <p>mruby可以通过mrbgem的方式进行扩展，要启用一个指定的gem，你可以使用`conf.gem`</p>
+	 <p>从 mruby3.0 起，一些 ruby symbol 将会被预先记录成 presym，从而节省运行时的 RAM 开销……当然，如果出于一些原因，你想关闭这个功能的话，可以使用 <code>conf.disable_presym</code></p>
+	 <p>在构建过程当中，<code>mrbc</code> 工具在交叉编译的环境下都会在该配置下被编译。</p>
+	 <h3>Mrbgems (mruby扩展包)</h3>
+	 <p>mruby 可以通过 mrbgem 的方式进行扩展，要启用一个指定的 gem，你可以使用 <code>conf.gem</code></p>
 	 <p>启用一个已经集成在源码目录下的gem：</p>
-	 <p>conf.gem :core => 'mruby-something'</p>
+	 <pre><code>conf.gem :core => 'mruby-something'</code></pre>
 	 <p>启用一个在github上托管的gem：</p>
-	 <p>conf.gem :github => 'someone/mruby-another'</p>
+	 <pre><code>conf.gem :github => 'someone/mruby-another'</code></pre>
 	 <p>启用一个binary gem(往往会产出一个可执行文件)：</p>
-	 <p>conf.gem :core => 'mruby-bin-mruby'</p>
+	 <pre><code>conf.gem :core => 'mruby-bin-mruby'</code></pre>
 	 <p>启用一个GemBox(若干Gems组成的集合)：</p>
-	 <p>conf.gembox "default"</p>
-	 <p>GemBox就是一组Gems组成的集合配置文件，参见`mrbgems/default.gembox`</p>
+	 <pre><code>conf.gembox "default"</code></pre>
+	 <p>GemBox就是一组Gems组成的集合配置文件，参见 <code>mrbgems/default.gembox</code></p>
 	 <p>如果你安装了cruby，你可以安装一个叫做mgem的RubyGem，它可以提供给你一个已经注册过的mrbgems列表。</p>
 	 <h3>Mrbtest</h3>
-	 <p>可以用`conf.build_mrbtest_lib_only`使得构建过程只产出mrbtest.a</p>
+	 <p>可以用 <code>conf.build_mrbtest_lib_only</code> 使得构建过程只产出 mrbtest.a</p>
 	 <h3>Bintest</h3>
 	 <p>用cruby测试mrbgems所产出的可执行文件</p>
-	 <p>这部分内容可以看看mrbgems目录下的`mruby-bin-*/bintest/*.rb`</p>
-	 <p>`conf.enable_bintest`</p>
+	 <p>这部分内容可以看看mrbgems目录下的 <code>mruby-bin-*/bintest/*.rb</code></p>
+	 <p><code>conf.enable_bintest</code></p>
 	 <h3>C++ ABI</h3>
-	 <p>一般情况下，mruby使用sjlj(setjmp/longjmp)来实现异常处理。不过在C++环境下，这个做法就没有办法正常地释放栈对象了，为了支持使用C++编写的mrbgems，mruby可以使用C++的异常处理来避免这个情况。</p>
-	 <p>关于这方面的配置，有两个等级可以选择。`conf.enable_cxx_exception`可以启用C++异常来代替sjlj，不过仍使用C ABI。另一个就是`conf.enable_cxx_abi`，如果启用它，那么所有文件都会用C++编译器来进行编译。</p>
-	 <h4>禁用C++异常</h4>
-	 <p>如果你的编译器不支持C++，你也确定不会使用一些由C++编写成的mrbgems，那就可以禁用C++异常，使用`conf.disable_cxx_exception`就可以了</p>
-	 <p>如果你这么做了，但还是启用了包含C++的mrbgems，那么就会收到报错</p>
+	 <p>一般情况下，mruby 使用 sjlj(setjmp/longjmp) 来实现异常处理。不过在 C++ 环境下，这个做法就没有办法正常地释放栈对象了，为了支持使用 C++ 编写的 mrbgems，mruby 可以使用 C++ 的异常处理来避免这个情况。</p>
+	 <p>关于这方面的配置，有两个等级可以选择。<code>conf.enable_cxx_exception</code> 可以启用 C++ 异常来代替 sjlj，不过仍使用 C ABI。另一个就是 <code>conf.enable_cxx_abi</code>，如果启用它，那么所有文件都会用C++编译器来进行编译。</p>
+	 <h4>禁用 C++ 异常</h4>
+	 <p>如果你的编译器不支持 C++，你也确定不会使用一些由 C++ 编写成的 mrbgems，那就可以禁用 C++ 异常，使用 <code>conf.disable_cxx_exception</code> 就可以了</p>
+	 <p>如果你这么做了，但还是启用了包含 C++ 的 mrbgems，那么就会收到报错</p>
 	 <h3>调试模式</h3>
-	 <p>`conf.enable_debug`可以打开调试</p>
+	 <p><code>conf.enable_debug</code> 可以打开调试</p>
 	 <p>调试模式开启时：</p>
-	 <p>* `MRB_DEBUG`会被添加到编译器宏定义，意味着`mrb_assert(...)`也会启用</p>
-	 <p>* `mrbc`生成的代码将会包含调试信息，这样就可以获得更清晰的backtrace信息</p>
+	 <ul>
+		 <li><code>MRB_DEBUG</code> 会被添加到编译器宏定义，意味着 <code>mrb_assert (...)</code> 也会启用</li>
+		 <li><code>mrbc</code> 生成的代码将会包含调试信息，这样就可以获得更清晰的 backtrace 信息</li>
+	 </ul>
 	 <h3>交叉编译(Cross-Compilation)</h3>
-	 <p>mruby支持从当前平台交叉编译到另一个平台。要准备交叉编译，你的配置文件中需要有一个交叉编译的配置对象(MRuby::CrossBuild的实例)，比如：</p>
-	 <p>MRuby::CrossBuild.new('32bit') do |conf|</p>
-	 <p>conf.toolchain :gcc</p>
-	 <p>conf.cc.flags = ['-m32']</p>
-	 <p>conf.linker.flags = ['-m32']</p>
-	 <p>end</p>
-	 <p>任何用在MRuby::Build中的配置选项都可以用于CrossBuild当中，参见build_config目录来获取示例</p>
+	 <p>mruby 支持从当前平台交叉编译到另一个平台。要准备交叉编译，你的配置文件中需要有一个交叉编译的配置对象 (MRuby::CrossBuild 的实例)，比如：</p>
+	 <pre><code class="language-rb">MRuby::CrossBuild.new ('32bit') do |conf|
+  conf.toolchain :gcc
+  conf.cc.flags = ['-m32']
+  conf.linker.flags = ['-m32']
+end</code></pre>
+	 <p>任何用在 MRuby::Build 中的配置选项都可以用于 CrossBuild 当中，参见 build_config 目录来获取示例</p>
 	 <h2>四、构建过程</h2>
-	 <p>构建前，mruby源码根目录将会创建一个build目录，整个构建过程中产生的文件都会位于该目录下。它的结构看起来像这样：</p>
-	 <p>+- build</p>
-	 <p>***|</p>
-	 <p>***+-  host</p>
-	 <p>*******|</p>
-	 <p>*******+- bin          <- 可执行程序 (mirb mrbc mruby)</p>
-	 <p>*******|</p>
-	 <p>*******+- lib          <- 静态库 (libmruby.a libmruby_core.a)</p>
-	 <p>*******|</p>
-	 <p>*******+- mrblib</p>
-	 <p>*******|</p>
-	 <p>*******+- src</p>
-	 <p>*******|</p>
-	 <p>*******+- test         <- mrbtest 工具</p>
-	 <p>*******|</p>
-	 <p>*******+- tools</p>
-	 <p>**********|</p>
-	 <p>**********+- mirb</p>
-	 <p>**********|</p>
-	 <p>**********+- mrbc</p>
-	 <p>**********|</p>
-	 <p>**********+- mruby</p>
+	 <p>构建前，mruby 源码根目录将会创建一个 build 目录，整个构建过程中产生的文件都会位于该目录下。它的结构看起来像这样：</p>
+	 <pre><code>+- build
+***|
+***+- host
+*******|
+*******+- bin &lt;- 可执行程序 (mirb mrbc mruby)
+*******|
+*******+- lib &lt;- 静态库 (libmruby.a libmruby_core.a)
+*******|
+*******+- mrblib
+*******|
+*******+- src
+*******|
+*******+- test &lt;- mrbtest 工具
+*******|
+*******+- tools
+**********|
+**********+- mirb
+**********|
+**********+- mrbc
+**********|
+**********+- mruby
+</code></pre>
 	 <p>编译工作流如下：</p>
-	 <p>编译所有src目录下的源代码(编译产物存放在build/host/src)</p>
-	 <p>生成parser语法文件(生成结果存放在build/host/src/y.tab.c)</p>
-	 <p>编译上一步的产物y.tab.c</p>
-	 <p>将这时所有的编译产物归档为libmruby_core.a，存放在build/host/lib下</p>
-	 <p>编译tools/mrbc/mrbc.c，并和上面的静态库链接成mrbc工具存放在build/host/bin下</p>
-	 <p>用上一步生成的mrbc工具编译mrblib下所有的*.rb文件，生成为build/host/mrblib/mrblib.c</p>
-	 <p>编译上一步的产物mrblib.c</p>
-	 <p>将这时所有的编译产物归档为libmruby.a，存放在build/host/lib下</p>
-	 <p>将mrbgems/mruby-bin-mruby/tools/mruby/mruby.c编译，并和上面的静态库链接成mruby工具存放在build/host/bin下</p>
-	 <p>和上面类似，产出mirb程序</p>
+	 <p>编译所有 src 目录下的源代码 (编译产物存放在 build/host/src)</p>
+	 <p>生成 parser 语法文件 (生成结果存放在 build/host/src/y.tab.c)</p>
+	 <p>编译上一步的产物 y.tab.c</p>
+	 <p>将这时所有的编译产物归档为 libmruby_core.a，存放在 build/host/lib 下</p>
+	 <p>编译 tools/mrbc/mrbc.c，并和上面的静态库链接成 mrbc 工具存放在 build/host/bin 下</p>
+	 <p>用上一步生成的 mrbc 工具编译 mrblib 下所有的 *.rb 文件，生成为 build/host/mrblib/mrblib.c</p>
+	 <p>编译上一步的产物 mrblib.c</p>
+	 <p>将这时所有的编译产物归档为 libmruby.a，存放在 build/host/lib 下</p>
+	 <p>将 mrbgems/mruby-bin-mruby/tools/mruby/mruby.c 编译，并和上面的静态库链接成 mruby 工具存放在 build/host/bin 下</p>
+	 <p>和上面类似，产出 mirb 程序</p>
 	 <h3>交叉编译的情况</h3>
-	 <p>假设我们建立了一个叫作`i386`的交叉编译配置，那么build目录看起来像这样：</p>
-	 <p>+- build</p>
-	 <p>***|</p>
-	 <p>***+-  host</p>
-	 <p>*******|</p>
-	 <p>*******+- bin          <- 本地平台的 可执行程序 (mirb mrbc mruby)</p>
-	 <p>*******|</p>
-	 <p>*******+- lib          <- 本地平台的 静态库 (libmruby.a libmruby_core.a)</p>
-	 <p>*******|</p>
-	 <p>*******+- mrblib</p>
-	 <p>*******|</p>
-	 <p>*******+- src</p>
-	 <p>*******|</p>
-	 <p>*******+- test         <- 本地平台的 mrbtest 工具</p>
-	 <p>*******|</p>
-	 <p>*******+- tools</p>
-	 <p>**********|</p>
-	 <p>**********+- mirb</p>
-	 <p>**********|</p>
-	 <p>**********+- mrbc</p>
-	 <p>**********|</p>
-	 <p>**********+- mruby</p>
-	 <p>***+-  i386</p>
-	 <p>*******|</p>
-	 <p>*******+- bin          <- i386平台的 可执行程序 (mirb mrbc mruby)</p>
-	 <p>*******|</p>
-	 <p>*******+- lib          <- i386平台的 静态库 (libmruby.a libmruby_core.a)</p>
-	 <p>*******|</p>
-	 <p>*******+- mrblib</p>
-	 <p>*******|</p>
-	 <p>*******+- src</p>
-	 <p>*******|</p>
-	 <p>*******+- test         <- i386平台的 mrbtest 工具</p>
-	 <p>*******|</p>
-	 <p>*******+- tools</p>
-	 <p>**********|</p>
-	 <p>**********+- mirb</p>
-	 <p>**********|</p>
-	 <p>**********+- mrbc</p>
-	 <p>**********|</p>
-	 <p>**********+- mruby</p>
-	 <p>可以看到，除了host外，又多出了为交叉编译而创建的目录。</p>
+	 <p>假设我们建立了一个叫作 <code>i386</code> 的交叉编译配置，那么 build 目录看起来像这样：</p>
+	 <pre><code>+- build
+***|
+***+- host
+*******|
+*******+- bin &lt;- 本地平台的 可执行程序 (mirb mrbc mruby)
+*******|
+*******+- lib &lt;- 本地平台的 静态库 (libmruby.a libmruby_core.a)
+*******|
+*******+- mrblib
+*******|
+*******+- src
+*******|
+*******+- test &lt;- 本地平台的 mrbtest 工具
+*******|
+*******+- tools
+**********|
+**********+- mirb
+**********|
+**********+- mrbc
+**********|
+**********+- mruby
+***+- i386
+*******|
+*******+- bin &lt;- i386 平台的 可执行程序 (mirb mrbc mruby)
+*******|
+*******+- lib &lt;- i386 平台的 静态库 (libmruby.a libmruby_core.a)
+*******|
+*******+- mrblib
+*******|
+*******+- src
+*******|
+*******+- test &lt;- i386 平台的 mrbtest 工具
+*******|
+*******+- tools
+**********|
+**********+- mirb
+**********|
+**********+- mrbc
+**********|
+**********+- mruby
+</code></pre>
+	 <p>可以看到，除了 host 外，又多出了为交叉编译而创建的目录。</p>
 	 <p>交叉编译的工作流一开始和普通编译并无不同，在本地平台的构建完成后，交叉编译的流程如下：</p>
-	 <p>交叉编译所有src目录下的源代码(编译产物存放在build/i386/src)</p>
-	 <p>生成parser语法文件(生成结果存放在build/i386/src/y.tab.c)</p>
-	 <p>交叉编译上一步的产物y.tab.c</p>
-	 <p>用mrbc工具编译mrblib下所有的*.rb文件，生成为build/i386/mrblib/mrblib.c</p>
-	 <p>交叉编译上一步的产物mrblib.c</p>
-	 <p>将这时所有的编译产物归档为libmruby.a，存放在build/i386/lib下</p>
-	 <p>将mrbgems/mruby-bin-mruby/tools/mruby/mruby.c编译，并和上面的静态库链接成mruby工具存放在build/i386/bin下</p>
-	 <p>和上面类似，产出mirb程序</p>
-	 <p>将这时的C源码编译产物归档为libmruby_core.a，存放在build/i386/lib下</p>
-	 <p>交叉编译tools/mrbc/mrbc.c，并和上面的静态库链接成mrbc工具存放在build/i386/bin下</p>
+	 <p>交叉编译所有 src 目录下的源代码 (编译产物存放在 build/i386/src)</p>
+	 <p>生成 parser 语法文件 (生成结果存放在 build/i386/src/y.tab.c)</p>
+	 <p>交叉编译上一步的产物 y.tab.c</p>
+	 <p>用 mrbc 工具编译 mrblib 下所有的 *.rb 文件，生成为 build/i386/mrblib/mrblib.c</p>
+	 <p>交叉编译上一步的产物 mrblib.c</p>
+	 <p>将这时所有的编译产物归档为 libmruby.a，存放在 build/i386/lib 下</p>
+	 <p>将 mrbgems/mruby-bin-mruby/tools/mruby/mruby.c 编译，并和上面的静态库链接成 mruby 工具存放在 build/i386/bin 下</p>
+	 <p>和上面类似，产出 mirb 程序</p>
+	 <p>将这时的 C 源码编译产物归档为 libmruby_core.a，存放在 build/i386/lib 下</p>
+	 <p>交叉编译 tools/mrbc/mrbc.c，并和上面的静态库链接成 mrbc 工具存放在 build/i386/bin 下</p>
 	 <h2>五、构建配置示例</h2>
 	 <h3>最小构建</h3>
-	 <p>要构建一个最小配置的mruby，你可以建立一个CrossBuild，编写如下：</p>
-	 <p>MRuby::CrossBuild.new('Minimal') do |conf|</p>
-	 <p>toolchain :gcc</p>
-	 <p>conf.cc.defines = %w(MRB_NO_STDIO)</p>
-	 <p>conf.bins = []</p>
-	 <p>end</p>
-	 <p>这个构建禁用所有stdio相关的功能，且不会产出可执行程序</p>
+	 <p>要构建一个最小配置的 mruby，你可以建立一个 CrossBuild，编写如下：</p>
+	 <pre><code class="language-rb">MRuby::CrossBuild.new ('Minimal') do |conf|
+  toolchain :gcc
+  conf.cc.defines = % w (MRB_NO_STDIO)
+  conf.bins = []
+end</code></pre>
+	 <p>这个构建禁用所有 stdio 相关的功能，且不会产出可执行程序</p>
 	 <h2>六、将mruby嵌入您的应用当中</h2>
-	 <p>构建过程完成后，你就可以获得一个`libmruby.a`，你可以将它链接到你的应用程序当中。</p>
-	 <p>你可以用mruby-config获取链接它所需要的配置清单。</p>
+	 <p>构建过程完成后，你就可以获得一个 <code>libmruby.a</code>，你可以将它链接到你的应用程序当中。</p>
+	 <p>你可以用 mruby-config 获取链接它所需要的配置清单。</p>
     </div> 
    </div> 
   </div> 
