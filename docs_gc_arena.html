@@ -70,13 +70,58 @@
 						<code>int mrb_gc_arena_save(mrb)</code>返回 GC arena 栈顶的当前位置，而
 						<code>void mrb_gc_arena_restore(mrb, idx)</code>会把 GC arena 栈顶的位置设置为 idx 。</p>
 					<p>可以像这样使用它：</p>
-					<pre>
-						<code class="language-c">int arena_idx = mrb_gc_arena_save(mrb); // ... 创建 mruby 对象 ... mrb_gc_arena_restore(mrb, arena_idx);</code></pre>
+					<pre><code class="language-c">int arena_idx = mrb_gc_arena_save(mrb);
+
+// ... 创建 mruby 对象 ...
+mrb_gc_arena_restore(mrb, arena_idx);
+
+</code></pre>
 					<p>在 mruby 中，C 函数的调用过程实际上就被这种 save/restore 所包围了, 但是我们可以通过手动在小范围内的 save/restore 进一步优化内存使用，也可以避免 &quot;arena overflow error&quot; 。</p>
 					<p>来看个实际的例子，这是
 						<code>Array#inspect</code>的代码：</p>
-					<pre>
-						<code class="language-c">static mrb_value inspect_ary(mrb_state *mrb, mrb_value ary, mrb_value list) { mrb_int i; mrb_value s, arystr; char head[] = { '[' }; char sep[] = { ',', ' ' }; char tail[] = { ']' }; /* check recursive */ for(i=0; i&lt;RARRAY_LEN(list); i++) { if (mrb_obj_equal(mrb, ary, RARRAY_PTR(list)[i])) { return mrb_str_new(mrb, &quot;[...]&quot;, 5); } } mrb_ary_push(mrb, list, ary); arystr = mrb_str_new_capa(mrb, 64); mrb_str_cat(mrb, arystr, head, sizeof(head)); for(i=0; i&lt;RARRAY_LEN(ary); i++) { int ai = mrb_gc_arena_save(mrb); if (i &gt; 0) { mrb_str_cat(mrb, arystr, sep, sizeof(sep)); } if (mrb_array_p(RARRAY_PTR(ary)[i])) { s = inspect_ary(mrb, RARRAY_PTR(ary)[i], list); } else { s = mrb_inspect(mrb, RARRAY_PTR(ary)[i]); } mrb_str_cat(mrb, arystr, RSTRING_PTR(s), RSTRING_LEN(s)); mrb_gc_arena_restore(mrb, ai); } mrb_str_cat(mrb, arystr, tail, sizeof(tail)); mrb_ary_pop(mrb, list); return arystr; }</code></pre>
+					<pre><code class="language-c">static mrb_value
+inspect_ary(mrb_state *mrb, mrb_value ary, mrb_value list)
+{
+  mrb_int i;
+  mrb_value s, arystr;
+  char head[] = { '[' };
+  char sep[] = { ',', ' ' };
+  char tail[] = { ']' };
+
+  /* check recursive */
+  for(i=0; i&lt;RARRAY_LEN(list); i++) {
+    if (mrb_obj_equal(mrb, ary, RARRAY_PTR(list)[i])) {
+      return mrb_str_new(mrb, &quot;[...]&quot;, 5);
+    }
+  }
+
+  mrb_ary_push(mrb, list, ary);
+
+  arystr = mrb_str_new_capa(mrb, 64);
+  mrb_str_cat(mrb, arystr, head, sizeof(head));
+
+  for(i=0; i&lt;RARRAY_LEN(ary); i++) {
+    int ai = mrb_gc_arena_save(mrb);
+
+    if (i &gt; 0) {
+      mrb_str_cat(mrb, arystr, sep, sizeof(sep));
+    }
+    if (mrb_array_p(RARRAY_PTR(ary)[i])) {
+      s = inspect_ary(mrb, RARRAY_PTR(ary)[i], list);
+    }
+    else {
+      s = mrb_inspect(mrb, RARRAY_PTR(ary)[i]);
+    }
+    mrb_str_cat(mrb, arystr, RSTRING_PTR(s), RSTRING_LEN(s));
+    mrb_gc_arena_restore(mrb, ai);
+  }
+
+  mrb_str_cat(mrb, arystr, tail, sizeof(tail));
+  mrb_ary_pop(mrb, list);
+
+  return arystr;
+}
+</code></pre>
 					<p>这是个实际的例子，所以有点长，请耐心看下去；
 						<code>Array#inspect</code>的本质就是对每个元素调用
 						<code>inspect</code>方法进行字符串化后, 再把这些结果给连接起来，这样就可以获得整个数组的
