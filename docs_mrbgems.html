@@ -68,7 +68,7 @@ conf.gem :mgem =&gt; 'yaml' # 'mruby-' prefix could be omitted
      <pre><code class="language-ruby">conf.gem mgem: 'mruby-redis', checksum_hash: '3446d19fc4a3f9697b5ddbf2a904f301c42f2f4e'
 </code></pre> 
      <p>如果有缺失的依赖项，mruby 就会引用 core 或 mgem-list 当中的 GEM。</p> 
-     <p>To pull all gems from remote GIT repository on build, call <code>rake -p</code>, or <code>rake --pull-gems</code>.</p> 
+     <p>要在构建时从远程 GIT 仓库中提取所有 gem, 调用 <code>rake -p</code>, 或 <code>rake --pull-gems</code>。</p> 
      <p>注: <code>:bitbucket</code> 只在 git 方式指定 GEM 时有效。</p> 
      <h2>GemBox</h2> 
      <p>在某些情况下，你可能会想要一次性地添加若干个 mrbgems 到 mruby 中；在这种场合下，你肯定希望用一个配置文件记录这些 mrbgems 并且复用它，而不是在每个构建配置文件中都写一次要添加的 mrbgems。 若干 mrbgems 的集合叫作 GemBox，它记录了要加载的 mrbgems 列表 (同样通过 conf.gem 的方式，但包装在一个 <code>MRuby::GemBox</code> 对象中)。 GemBox 通过 <code>config.gembox 'boxname'</code> 添加到 mruby 中。</p> 
