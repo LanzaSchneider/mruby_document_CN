@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="">
+ <head> 
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <title>mrbgems(mruby扩展)</title> 
+  <meta name="theme-color" content="#e0115f" /> 
+  <!-- Favicon --> 
+  <link rel="icon" type="image/x-icon" href="http://mruby.org/favicon.ico" /> 
+  <link rel="apple-touch-icon" sizes="180x180" href="http://mruby.org/assets/images/icons/apple-touch-icon.png" /> 
+  <link rel="icon" type="image/png" sizes="32x32" href="http://mruby.org/assets/images/icons/favicon-32x32.png" /> 
+  <link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png" /> 
+  <link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest" /> 
+  <!-- Bootstrap CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" /> 
+  <!-- Latest compiled and minified JavaScript --> 
+  <script src="./mruby_site_files/jquery-3.5.1.slim.min.js.download" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> 
+  <script src="./mruby_site_files/bootstrap.bundle.min.js.download" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script> 
+  <!-- syntax highlighting CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/syntax.css" /> 
+  <!-- Custom CSS --> 
+  <link rel="stylesheet" href="./mruby_site_files/main.css" /> 
+  <link type="text/css" rel="stylesheet" charset="UTF-8" href="./mruby_site_files/translateelement.css" /> 
+ </head> 
+ <body> 
+  <nav class="navbar navbar-expand-md navbar-header navbar-mruby
+            justify-content-between pt-0" role="navigation"> 
+   <a href="http://mruby.org/"> <img src="./mruby_site_files/mruby_header.png" alt="mruby" title="mruby" /> </a> 
+   <div> 
+    <ul class="nav navbar-nav"> 
+     <li class="nav-item"> <a href="executing-ruby-code-with-mruby.html" class="nav-link">用mruby执行Ruby代码</a> </li> 
+     <li class="nav-item"> <a href="docs_compile.html" class="nav-link">编译指南</a> </li> 
+     <li class="nav-item"> <a href="docs_mrbconf.html" class="nav-link">编译配置选项</a> </li> 
+	 <li class="nav-item"> <a href="docs_mrbgems.html" class="nav-link">mrbgems(mruby扩展)</a> </li> 
+    </ul> 
+   </div> 
+  </nav> 
+  <div class="container"> 
+   <div class="row clearfix"> 
+    <div class="col-md-12 column"> 
+     <h1>mrbgems(mruby扩展)</h1> 
+     <p>译者<a href="https://lanzainc.xyz/">Lanza Schneider</a></p> 
+     <p>mrbgems 是一个便于使用 C 语言和 ruby 脚本来扩展 mruby 的库管理器，本章会专门介绍它。</p> 
+     <h2>使用 mrbgems</h2> 
+     <p>首先要在构建配置文件中启用它。 你可以用如下的方式，启用一个特定的 GEM</p> 
+     <pre><code class="language-ruby">conf.gem '/path/to/your/gem/dir'
+</code></pre> 
+     <p>也可以用相对路径指定一个 GEM</p> 
+     <pre><code class="language-ruby">conf.gem 'examples/mrbgems/ruby_extension_example'
+</code></pre> 
+     <p>在这种情况下，</p> 
+     <ul> 
+      <li>如果你的构建配置文件位于 <code>build_config</code> 目录，那么指定 GEM 的路径会相对于 <code>MRUBY_ROOT</code>(即 mruby 源代码的根目录)。</li> 
+      <li>否则，GEM 的路径会相对于构建配置文件的所在路径。</li> 
+     </ul> 
+     <p>mruby 同样支持托管于 GIT repo 的 GEM：</p> 
+     <pre><code class="language-ruby">conf.gem :git =&gt; 'https://github.com/masuidrive/mrbgems-example.git', :branch =&gt; 'master'
+conf.gem :github =&gt; 'masuidrive/mrbgems-example', :branch =&gt; 'master'
+conf.gem :bitbucket =&gt; 'mruby/mrbgems-example', :branch =&gt; 'master'
+</code></pre> 
+     <p>你还可以用 <code>:path</code> 参数来指定 repo 的子目录:</p> 
+     <pre><code class="language-ruby">conf.gem github: 'mruby/mruby', path: 'mrbgems/mruby-socket'
+</code></pre> 
+     <p>你还可以通过使用 <code>:mgem</code> 来启用 <a href="https://github.com/mruby/mgem-list">mgem-list</a> 中的 GEM：</p> 
+     <pre><code class="language-ruby">conf.gem :mgem =&gt; 'mruby-yaml'
+conf.gem :mgem =&gt; 'yaml' # 'mruby-' prefix could be omitted
+</code></pre> 
+     <p>可以指定 <code>:checksum_hash</code> 参数来选择一个特定的提交版本:</p> 
+     <pre><code class="language-ruby">conf.gem mgem: 'mruby-redis', checksum_hash: '3446d19fc4a3f9697b5ddbf2a904f301c42f2f4e'
+</code></pre> 
+     <p>如果有缺失的依赖项，mruby 就会引用 core 或 mgem-list 当中的 GEM。</p> 
+     <p>To pull all gems from remote GIT repository on build, call <code>rake -p</code>, or <code>rake --pull-gems</code>.</p> 
+     <p>注: <code>:bitbucket</code> 只在 git 方式指定 GEM 时有效。</p> 
+     <h2>GemBox</h2> 
+     <p>在某些情况下，你可能会想要一次性地添加若干个 mrbgems 到 mruby 中；在这种场合下，你肯定希望用一个配置文件记录这些 mrbgems 并且复用它，而不是在每个构建配置文件中都写一次要添加的 mrbgems。 若干 mrbgems 的集合叫作 GemBox，它记录了要加载的 mrbgems 列表 (同样通过 conf.gem 的方式，但包装在一个 <code>MRuby::GemBox</code> 对象中)。 GemBox 通过 <code>config.gembox 'boxname'</code> 添加到 mruby 中。</p> 
+     <p>举例，下列代码创建一个 GemBox 并将 <em>mruby-time</em> 和 <em>mrbgems-example</em> 包含其中：</p> 
+     <pre><code class="language-ruby">MRuby::GemBox.new do |conf|
+  conf.gem &quot;#{root}/mrbgems/mruby-time&quot;
+  conf.gem :github =&gt; 'masuidrive/mrbgems-example'
+end
+</code></pre> 
+     <p>如上所述，GemBox 和 <code>MRuby::Build</code> 的设定方式相同。GemBox 必须存储在以 <em>.gembox</em> 为扩展名的文件，并放在 <em>mrbgems</em> 目录下以便让 mruby 引用。</p> 
+     <p>我们把上述例子的 GemBox 存储为 <code>custom.gembox</code> 并放在 mruby 的 * mrbgems * 目录下，以及在配置文件中添加如下代码：</p> 
+     <pre><code class="language-ruby">conf.gembox 'custom'
+</code></pre> 
+     <p>这会使 <em>custom</em> GemBox 在构建过程中被加载，也就是 <em>mruby-time</em> 和 <em>mrbgems-example</em> 这两个 GEM 被添加到当前构建中。</p> 
+     <p>如果你需要的话，也可以把 GemBox 放在 mruby 源代码目录之外，这种情况下用绝对路径就可以了：</p> 
+     <pre><code class="language-ruby">conf.gembox &quot;#{ENV [&quot;HOME&quot;]}/mygemboxes/custom&quot;
+</code></pre> 
+     <p>有两个 GemBox 是 mruby 自带的： <a href="../../mrbgems/default.gembox">default</a> 包含了几个 mruby 的核心组件； <a href="../../mrbgems/full-core.gembox">full-core</a> 则包含了 <em>mrbgems</em> 目录下的所有 GEM</p> 
+     <h2>GEM 的结构</h2> 
+     <p>一个最完整的 GEM 目录结构如下:</p> 
+     <pre><code>+- GEM_NAME         &lt;- GEM 名称
+   |
+   +- include/      &lt;- 用于扩展 mruby 的头文件 (这个目录会添加到相应的编译器搜索路径)
+   |
+   +- mrblib/       &lt;- Ruby 扩展源代码
+   |
+   +- src/          &lt;- C 扩展源代码
+   |
+   +- test/         &lt;- 测试代码 (Ruby)
+   |
+   +- mrbgem.rake   &lt;- GEM 说明文件
+   |
+   +- README.md     &lt;- GEM 自述文件
+</code></pre> 
+     <p><em>mrblib</em> 目录下只包含纯 Ruby 源代码，而 <em>src</em> 目录包含的是 C/C++ 源代码。<em>include</em> 目录则存放 C/C++ 头文件。<em>test</em> 将会存放用于 <code>mrbtest</code> 测试时使用的 C/C++ 和 Ruby 源代码。<em>mrbgem.rake</em> 会存放关于 C 和 Ruby 扩展的信息 (比如一些编译 flags). <em>README.md</em> 则是 GEM 的一些简述文本.</p> 
+     <h2>构建过程</h2> 
+     <p>mrbgems 需要一个叫作 <em>mrbgem.rake</em> 的说明文件存放在 GEM 目录下，该文件的典型内容如下:</p> 
+     <pre><code class="language-ruby">MRuby::Gem::Specification.new ('c_and_ruby_extension_example') do |spec|
+  spec.license = 'MIT'
+  spec.author  = 'mruby developers'
+  spec.summary = 'Example mrbgem using C and ruby'
+end
+</code></pre> 
+     <p>构建过程将会根据该文件的设置来编译 C 和 Ruby 源代码，编译结果会被归档到 <em>lib/libmruby.a</em> 静态库中。因此 GEM 的功能会被添加到像 <code>mruby</code> 或是 <code>mirb</code> 这样的应用产品上。</p> 
+     <p>可以在 <code>MRuby::Gem::Specification</code> 对象中添加的描述:</p> 
+     <ul> 
+      <li><code>spec.license</code> 或 <code>spec.licenses</code> (一个或多个该 GEM 的授权协议 (的列表)，如 &quot;MIT&quot;)</li> 
+      <li><code>spec.author</code> 或 <code>spec.authors</code> (一个或多个开发者名称 (的列表))</li> 
+      <li><code>spec.version</code> (当前 GEM 的版本)</li> 
+      <li><code>spec.description</code> (细节描述)</li> 
+      <li><code>spec.summary</code> 
+       <ul> 
+        <li>对 GEM 功能的简述 (往往只有一行)</li> 
+        <li>在 mruby 构建完成时将会显示在构建结果处</li> 
+       </ul></li> 
+      <li><code>spec.homepage</code> (该 GEM 的主页)</li> 
+      <li><code>spec.requirements</code> (关于该 GEM 所需外部依赖项的提示说明)</li> 
+     </ul> 
+     <p>其中，<code>license</code> 与 <code>author</code> 是必填项。</p> 
+     <p>如果该 GEM 需要依赖另外的 GEM，可以用： <code>spec.add_dependency (gem, *requirements [, default_get_info])</code></p> 
+     <pre><code class="language-ruby">MRuby::Gem::Specification.new ('c_and_ruby_extension_example') do |spec|
+  spec.license = 'MIT'
+  spec.author  = 'mruby developers'
+
+  # 添加 mruby-parser 依赖
+  # 该依赖版本必须在 1.0.0 和 1.5.2 之间
+  spec.add_dependency ('mruby-parser', '&gt;= 1.0.0', '&lt;= 1.5.2')
+
+  # 添加托管于 github 上的 mruby-uv 依赖 (任意版本)
+  spec.add_dependency ('mruby-uv', '&gt;= 0.0.0', :github =&gt; 'mattn/mruby-uv')
+
+  # 添加托管于 github 上最新版本的 mruby-onig-regexp
+  spec.add_dependency ('mruby-onig-regexp', :github =&gt; 'mattn/mruby-onig-regexp')
+
+  # 也可以添加一些只在测试状况下才依赖的 GEM
+  spec.add_test_dependency ('mruby-process', :github =&gt; 'iij/mruby-process')
+end
+</code></pre> 
+     <p>版本号并不是必须的 如果要填写，请看如下列表:</p> 
+     <ul> 
+      <li>'=': 表示等于</li> 
+      <li>'!=': 表示不等于</li> 
+      <li>'&gt;': 表示大于</li> 
+      <li>'&lt;': 表示小于</li> 
+      <li>'&gt;=': 表示大于或等于</li> 
+      <li>'&lt;=': 表示小于或等于</li> 
+      <li>'~&gt;': 是大于或等于主版本号，但是小于下一个次版本号 
+       <ul> 
+        <li>示例 1: '~&gt; 2.2.2' 表示 '&gt;= 2.2.2' 且 '&lt; 2.3.0'</li> 
+        <li>示例 2: '~&gt; 2.2' 表示 '&gt;= 2.2.0' 且 '&lt; 3.0.0'</li> 
+       </ul></li> 
+     </ul> 
+     <p>当你传递了多个版本需求时，依赖关系必须满足所有的版本需求。</p> 
+     <p>构建配置中没有添加默认 gem 时，你可以使用它作为依赖。 当 <code>add_dependency</code> 调用的最后一个参数是 Hash 类型时，它将被视为默认的 gem 信息。其格式与方法 <code>MRuby::Build#gem</code> 的参数相同，但不能作为 gem 的路径来处理。</p> 
+     <p>当需要特殊版本的依赖项时，在构建配置中使用 <code>MRuby::Build#gem</code> 来覆盖默认的 gem。</p> 
+     <p>和依赖项相反，如果有不兼容其它 GEM 的情况，可以写:</p> 
+     <ul> 
+      <li><code>spec.add_conflict (gem, *requirements)</code> 
+       <ul> 
+        <li><code>requirements</code> 参数和 <code>add_dependency</code> 是一致的.</li> 
+       </ul></li> 
+     </ul> 
+     <p>示例:</p> 
+     <pre><code class="language-ruby">MRuby::Gem::Specification.new'some-regexp-binding' do |spec|
+  spec.license = 'BSD'
+  spec.author = 'John Doe'
+
+  spec.add_conflict 'mruby-onig-regexp', '&gt; 0.0.0'
+  spec.add_conflict 'mruby-hs-regexp'
+  spec.add_conflict 'mruby-pcre-regexp'
+  spec.add_conflict 'mruby-regexp-pcre'
+end
+</code></pre> 
+     <p>如果该 GEM 有更复杂的构建要求，你可以使用下列选项。</p> 
+     <ul> 
+      <li><code>spec.cc.flags</code> (C 编译器 flags)</li> 
+      <li><code>spec.cc.defines</code> (C 编译器 defines)</li> 
+      <li><code>spec.cc.include_paths</code> (C 编译器的搜索路径)</li> 
+      <li><code>spec.linker.flags</code> (链接器 flags)</li> 
+      <li><code>spec.linker.libraries</code> (链接时的附加依赖库)</li> 
+      <li><code>spec.linker.library_paths</code> (链接时的附加依赖库的搜索路径)</li> 
+      <li><code>spec.bins</code> (生成的可执行文件)</li> 
+      <li><code>spec.rbfiles</code> (要编译的 Ruby 文件)</li> 
+      <li><code>spec.objs</code> (要编译产出的目标文件)</li> 
+      <li><code>spec.test_rbfiles</code> (测试时要编译的 Ruby 文件)</li> 
+      <li><code>spec.test_objs</code> (测试时要编译产出的目标文件)</li> 
+      <li><code>spec.test_preload</code> (mrbtest 时要加载的初始文件)</li> 
+     </ul> 
+     <p>你也可以通过 <code>spec.mruby.cc</code> 和 <code>spec.mruby.linker</code> 直接向整个构建过程添加额外的编译 / 链接选项。</p> 
+     <h3>包含目录和依赖项</h3> 
+     <p>GEM 可以把 include 目录导出给其它依赖于该 GEM 的其它 GEM 来使用。 默认情况下，<code>/...absolute path.../{GEM_NAME}/include</code> 会被导出。 所以推荐把该 GEM 用到的头文件放入 include/ 目录下。</p> 
+     <p>这些导出都是可传递的，比如： 当 B 依赖 C 而 A 又依赖 B, A 也就可以用到 C 所导出的 include 目录。</p> 
+     <p>导出的 include 目录会被 rake 程序自动添加到 GEM 本地的 include_paths 选项。 你也可以通过操作 <code>spec.export_include_paths</code> 选项来手动控制更复杂的构建情况。</p> 
+     <h2>C 扩展</h2> 
+     <p>mruby 可以用 C 语言 编写扩展，也就是你可以通过 mruby 的 C API 来把 C 库的功能传入 mruby。</p> 
+     <h3>C 扩展的初始化</h3> 
+     <p>mrbgems 需要你编写一个名为 <code>mrb_YOURGEMNAME_gem_init (mrb_state)</code> 的 C 函数。<code>YOURGEMNAME</code> 是该 GEM 的名称。如果你的 GEM 名为 <em>c_extension_example</em>, 你的初始化函数应该写成这样：</p> 
+     <pre><code class="language-C">void
+mrb_c_extension_example_gem_init (mrb_state* mrb) {
+  struct RClass *class_cextension = mrb_define_module (mrb, &quot;CExtension&quot;);
+  mrb_define_class_method (mrb, class_cextension, &quot;c_method&quot;, mrb_c_method, MRB_ARGS_NONE ());
+}
+</code></pre> 
+     <p>译者注：如果你使用 C++ 编写扩展，别忘了在该函数前添加 extern &quot;C&quot; 来确保该函数匹配 C ABI。</p> 
+     <h3>C 扩展的卸载</h3> 
+     <p>mrbgems 需要你编写一个名为 <code>mrb_YOURGEMNAME_gem_final (mrb_state)</code> 的 C 函数。<code>YOURGEMNAME</code> 是该 GEM 的名称。如果你的 GEM 名为 <em>c_extension_example</em>, 你的初始化函数应该写成这样：</p> 
+     <pre><code class="language-C">void
+mrb_c_extension_example_gem_final (mrb_state* mrb) {
+  free (someone);
+}
+</code></pre> 
+     <h3>示例</h3> 
+     <pre><code>+- c_extension_example/
+   |
+   +- src/
+   |  |
+   |  +- example.c         &lt;- C 扩展的源代码
+   |
+   +- test/
+   |  |
+   |  +- example.rb        &lt;- 测试用的 Ruby 代码
+   |
+   +- mrbgem.rake          &lt;- GEM 说明文件
+   |
+   +- README.md
+</code></pre> 
+     <h2>Ruby 扩展</h2> 
+     <p>mruby 也可以用纯 Ruby 代码进行扩展。这就便于你覆盖一些现存的类或者干脆创建一些新的类。这种扩展方式只要把所有 Ruby 源代码放入 GEM 的 <em>mrblib</em> 目录下即可。</p> 
+     <h3>示例</h3> 
+     <pre><code>+- ruby_extension_example/
+   |
+   +- mrblib/
+   |  |
+   |  +- example.rb        &lt;- Ruby 扩展源代码
+   |
+   +- test/
+   |  |
+   |  +- example.rb        &lt;- 测试用的 Ruby 代码
+   |
+   +- mrbgem.rake          &lt;- GEM 说明文件
+   |
+   +- README.md
+</code></pre> 
+     <h2>C 和 Ruby 的混合扩展</h2> 
+     <p>你可以同时使用 C 和 Ruby 代码来扩展 mruby 的功能。</p> 
+     <p><em>mrblib</em> 目录下的代码会在 C 函数 <code>gem_init</code> 执行后调用。所以要确保 *mruby 脚本 * 依赖 *C 代码 * 而不是 *C 代码 * 依赖 *mruby 脚本 *。</p> 
+     <h3>示例</h3> 
+     <pre><code>+- c_and_ruby_extension_example/
+   |
+   +- mrblib/
+   |  |
+   |  +- example.rb        &lt;- Ruby 扩展源代码
+   |
+   +- src/
+   |  |
+   |  +- example.c         &lt;- C 扩展的源代码
+   |
+   +- test/
+   |  |
+   |  +- example.rb        &lt;- 测试用的 Ruby 代码
+   |
+   +- mrbgem.rake          &lt;- GEM 说明文件
+   |
+   +- README.md
+</code></pre> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="goog-te-spinner-pos"> 
+   <div class="goog-te-spinner-animation"> 
+    <svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px" height="96px" viewbox="0 0 66 66"> 
+     <circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle> 
+    </svg> 
+   </div> 
+  </div>  
+ </body>
+</html>
