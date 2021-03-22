@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html class="">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>关于 GC arena</title>
+		<meta name="theme-color" content="#e0115f" />
+		<!-- Favicon -->
+		<link rel="icon" type="image/x-icon" href="http://mruby.org/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="http://mruby.org/assets/images/icons/apple-touch-icon.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="http://mruby.org/assets/images/icons/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png" />
+		<link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest" />
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous" />
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="./mruby_site_files/jquery-3.5.1.slim.min.js.download" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+		<script src="./mruby_site_files/bootstrap.bundle.min.js.download" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+		<!-- syntax highlighting CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/syntax.css" />
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/main.css" />
+		<link type="text/css" rel="stylesheet" charset="UTF-8" href="./mruby_site_files/translateelement.css" /></head>
+	<body>
+		<nav class="navbar navbar-expand-md navbar-header navbar-mruby
+		justify-content-between pt-0" role="navigation">
+			<a href="http://mruby.org/">
+				<img src="./mruby_site_files/mruby_header.png" alt="mruby" title="mruby" /></a>
+			<div>
+				<ul class="nav navbar-nav">
+					<li class="nav-item">
+						<a href="executing-ruby-code-with-mruby.html" class="nav-link">用mruby执行Ruby代码</a></li>
+					<li class="nav-item">
+						<a href="docs_compile.html" class="nav-link">编译指南</a></li>
+					<li class="nav-item">
+						<a href="docs_mrbconf.html" class="nav-link">编译配置选项</a></li>
+					<li class="nav-item">
+						<a href="docs_mrbgems.html" class="nav-link">mrbgems(mruby扩展)</a></li>
+					<li class="nav-item">
+						<a href="docs_gc_arena.html" class="nav-link">关于 GC arena</a></li>
+				</ul>
+			</div>
+		</nav>
+		<div class="container">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<h1>关于 GC arena</h1>
+					<p>
+						<strong>译者
+							<a href="https://lanzainc.xyz/">Lanza Schneider</a></strong>
+					</p>
+					<p>当你使用 C 语言扩展 mruby 时，可能会遇到神秘的&quot;arena overflow error&quot;或是内存泄漏，又或者是严重的执行效率拖慢问题。出现这种情况就说明 mruby 的保守 GC 遭遇了&quot;GC arena 溢出&quot;的错误。</p>
+					<p>GC (garbage collector 即垃圾收集器)必须检测对象的存活性，所谓存活性，就是说一个对象是否还在被程序的某处所引用。为了达到这个目的，我们设置了 root，也就是 GC 的根节点，如果一个对象能直接或间接地与 root 连接，就可以说明这个对象存活。本地临时变量、全局变量和常量都是 root 。</p>
+					<p>如果程序一直在 mruby 虚拟机内执行，那就没有什么可担心的了。因为 GC 显然可以获取到这个过程当中所有的 root 。</p>
+					<p>问题发生在执行 C 函数时。按理来说，在 C 函数里产生的对象应该也算是&quot;本地临时变量&quot;，所以应该是存活的，但是 mruby GC 显然是没办法认识到这点的，所以它会误认为在 C 函数执行过程中产生的对象是非存活的。</p>
+					<p>那么显然，如果这时 GC 试图收集掉这个本应存活的对象，那就是一个致命的错误。</p>
+					<p>在 CRuby 当中，我们可以扫描 C 的栈空间，这样就可以把 C 栈空间里的变量视作 root 来检查对象是否存活。当然，因为 C 栈空间只是一个内存区域，所以我们没有办法知道里面到底是一个 int 数据还是一个指针。所以我们在它看起来像是一个指针的情况下，就假设它为一个指针。我们称之为&quot;conservative(保守)&quot;。</p>
+					<p>顺带一提，Cruby 的 &quot;conservative GC&quot; 有一些问题。最大的问题就是我们没有办法用一种可移植的方式来访问 C 栈空间。mruby 的目标是实现一个高度可移植的 runtime ，所以这种方法就不能用了。</p>
+					<p>所以我们想到了另一个能够在 mruby 中实现 &quot;conservative GC&quot; 的方式：把所有在 C 函数中创建的对象都视为存活，这样就不会出现 GC 把它们误认为非存活对象的问题。</p>
+					<p>这意味着，由于我们不能收集真正的非存活对象，所以可能会影响效率；也正是以此为代价，才实现了 mruby 的高度可移植性。</p>
+					<p>这样就告别了在 CRuby 中有时会出现的 &quot;收集了本不该收集的对象&quot; 问题。</p>
+					<p>顺着思路讲，我们有一个叫做 &quot;GC arena&quot; 的表，它的作用是记忆哪些对象是在 C 函数中创建的。</p>
+					<p>arena 是一个栈结构，当 C 函数执行完毕返回到 mruby 虚拟机时，所有 arena 中注册的对象都会弹出。</p>
+					<p>这个做法很不错，不过也会导致其它问题：&quot;arena overflow error&quot; 或内存泄漏。</p>
+					<p>在写这篇文章时(译者注：2013年)，mruby 会自动扩展 arena 来记忆 C 函数中的对象。如果你在 C 函数中创建了许多对象，内存使用量就会增加，因为 GC 并没有真正工作过。这种内存消耗也许看起来像是内存泄漏，也可能会导致执行速度的拖慢(因为需要分配更多内存)。</p>
+					<p>通过配置(译者注：可以看 mrbconf 那一章)，你可以让 arena 变为固定大小，并且限制它的最大对象数目(默认 100)。如果你在 C 函数中创建了很多对象，arena就会溢出——也就是抛出一个&quot;arena overflow error&quot;。</p>
+					<p>为了解决这些问题，mruby C API 提供了
+						<code>mrb_gc_arena_save()</code>and
+						<code>mrb_gc_arena_restore()</code>函数。</p>
+					<p>
+						<code>int mrb_gc_arena_save(mrb)</code>返回 GC arena 栈顶的当前位置，而
+						<code>void mrb_gc_arena_restore(mrb, idx)</code>会把 GC arena 栈顶的位置设置为 idx 。</p>
+					<p>可以像这样使用它：</p>
+					<pre>
+						<code class="language-c">int arena_idx = mrb_gc_arena_save(mrb); // ... 创建 mruby 对象 ... mrb_gc_arena_restore(mrb, arena_idx);</code></pre>
+					<p>在 mruby 中，C 函数的调用过程实际上就被这种 save/restore 所包围了, 但是我们可以通过手动在小范围内的 save/restore 进一步优化内存使用，也可以避免 &quot;arena overflow error&quot; 。</p>
+					<p>来看个实际的例子，这是
+						<code>Array#inspect</code>的代码：</p>
+					<pre>
+						<code class="language-c">static mrb_value inspect_ary(mrb_state *mrb, mrb_value ary, mrb_value list) { mrb_int i; mrb_value s, arystr; char head[] = { '[' }; char sep[] = { ',', ' ' }; char tail[] = { ']' }; /* check recursive */ for(i=0; i&lt;RARRAY_LEN(list); i++) { if (mrb_obj_equal(mrb, ary, RARRAY_PTR(list)[i])) { return mrb_str_new(mrb, &quot;[...]&quot;, 5); } } mrb_ary_push(mrb, list, ary); arystr = mrb_str_new_capa(mrb, 64); mrb_str_cat(mrb, arystr, head, sizeof(head)); for(i=0; i&lt;RARRAY_LEN(ary); i++) { int ai = mrb_gc_arena_save(mrb); if (i &gt; 0) { mrb_str_cat(mrb, arystr, sep, sizeof(sep)); } if (mrb_array_p(RARRAY_PTR(ary)[i])) { s = inspect_ary(mrb, RARRAY_PTR(ary)[i], list); } else { s = mrb_inspect(mrb, RARRAY_PTR(ary)[i]); } mrb_str_cat(mrb, arystr, RSTRING_PTR(s), RSTRING_LEN(s)); mrb_gc_arena_restore(mrb, ai); } mrb_str_cat(mrb, arystr, tail, sizeof(tail)); mrb_ary_pop(mrb, list); return arystr; }</code></pre>
+					<p>这是个实际的例子，所以有点长，请耐心看下去；
+						<code>Array#inspect</code>的本质就是对每个元素调用
+						<code>inspect</code>方法进行字符串化后, 再把这些结果给连接起来，这样就可以获得整个数组的
+						<code>inspect</code>表示。</p>
+					<p>在每次调用
+						<code>inspect</code>获得结果后, 我们就会把它通过
+						<code>mrb_str_cat</code>把它连接到
+						<code>arystr</code>中，所以这个单个的临时字符串就不需要再进入 GC arena 了。</p>
+					<p>因此，为了不让这些临时对象占用 GC arena 的空间，
+						<code>ary_inspect()</code>函数将会执行如下操作：</p>
+					<ul>
+						<li>用
+							<code>mrb_gc_arena_save()</code>保存 arena 栈顶的位置</li>
+						<li>获取当前元素的
+							<code>inspect</code>结果(一个字符串)</li>
+						<li>把这个字符串连接到整个数组的
+							<code>inspect</code>结果中(这时，这个字符串就不再需要了)</li>
+						<li>用
+							<code>mrb_gc_arena_restore()</code>恢复 arena 栈顶的位置</li></ul>
+					<p>注意临时的
+						<code>inspect</code>添加到整个结果之后，我们才调用
+						<code>mrb_gc_arena_restore()</code>的。否则这个临时对象可能来不及用就被回收了。</p>
+					<p>我们可能遇到这种情况：在创建了很多临时对象之后，还要保留其中的一些。在这种情况下，我们就不能采用相同的思路了。在
+						<code>mrb_gc_arena_restore()</code>调用之后，你需要用
+						<code>mrb_gc_protect(mrb, obj)</code>重新把这些临时对象注册到 GC arena 里。</p>
+					<p>要谨慎使用
+						<code>mrb_gc_protect()</code>，因为它也会导致&quot;arena overflow error&quot;。</p>
+					<p>还需要提到的一点是，当你在顶层调用
+						<code>mrb_funcall</code>时，它的返回值也会注册到 GC arena, 所以重复调用
+						<code>mrb_funcall</code>也可能会导致 &quot;arena overflow error&quot;。</p></div>
+			</div>
+		</div>
+		<div class="goog-te-spinner-pos">
+			<div class="goog-te-spinner-animation">
+				<svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px" height="96px" viewbox="0 0 66 66">
+					<circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+				</svg>
+			</div>
+		</div>
+	</body>
+
+</html>
