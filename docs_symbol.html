@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html class="">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>Symbols(mruby 符号)</title>
+		<meta name="theme-color" content="#e0115f" />
+		<!-- Favicon -->
+		<link rel="icon" type="image/x-icon" href="http://mruby.org/favicon.ico"
+		/>
+		<link rel="apple-touch-icon" sizes="180x180" href="http://mruby.org/assets/images/icons/apple-touch-icon.png"
+		/>
+		<link rel="icon" type="image/png" sizes="32x32" href="http://mruby.org/assets/images/icons/favicon-32x32.png"
+		/>
+		<link rel="icon" type="image/png" sizes="16x16" href="http://mruby.org/assets/images/icons/favicon-16x16.png"
+		/>
+		<link rel="manifest" href="http://mruby.org/assets/images/icons/site.webmanifest"
+		/>
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/bootstrap.min.css" />
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="./mruby_site_files/jquery-3.5.1.slim.min.js">
+		</script>
+		<script src="./mruby_site_files/bootstrap.bundle.min.js">
+		</script>
+		<!-- syntax highlighting CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/syntax.css" />
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="./mruby_site_files/main.css" />
+		<link type="text/css" rel="stylesheet" charset="UTF-8" href="./mruby_site_files/translateelement.css"
+		/>
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-md navbar-header navbar-mruby
+		justify-content-between pt-0" role="navigation">
+			<a href="http://mruby.org/">
+				<img src="./mruby_site_files/mruby_header.png" alt="mruby" title="mruby"
+				/>
+			</a>
+			<div>
+				<ul class="nav navbar-nav">
+					<li class="nav-item"><a href="http://mruby.org/" class="nav-link">mruby 官方网站</a></li>
+					<li class="nav-item"><a href="index.html" class="nav-link">mruby 中文文档首页</a></li>
+				</ul>
+			</div>
+		</nav>
+		<div class="container">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<h1 id="executing-ruby-code-with-mruby">Symbols(mruby 符号)</h1>
+					<p><strong>译者<a href="https://lanzainc.xyz/">Lanza Schneider</a></strong></p>
+					<p>(译者注：这章的符号就是 Ruby 中的 Symbol 对象，顾名思义，它是一个充当符号的物件，用于变量名、方法名、常量名等各种需要标识符的地方)</p>
+<p><code>mruby</code> C 源代码中的符号由<code>mrb_sym</code>表示，它是<code>uint32_t</code>的别名。
+其中，低30位用作符号，而高2位用作flags，例如<code>class.c</code>中出现的<code>struct mt_elem</code>：</p>
+<pre><code class="language-C">struct mt_elem {
+  union mt_ptr ptr;
+  size_t func_p:1;
+  size_t noarg_p:1;
+  mrb_sym key:sizeof(mrb_sym)*8-2;
+};
+</code></pre>
+<h2>C API</h2>
+<p>我们为符号提供了如下的 C API。</p>
+<h3>生成符号</h3>
+<h4><code>mrb_sym mrb_intern(mrb_state*,const char*,size_t)</code></h4>
+<p>用字符串获取一个对应的符号。</p>
+<h4><code>mrb_sym mrb_intern_check_cstr(mrb_state*,const char*)</code></h4>
+<p>用一个以 NULL 结尾的 C 字符串获取一个对应的符号。</p>
+<h4><code>mrb_sym mrb_intern_str(mrb_state*,mrb_value)</code></h4>
+<p>用一个 Ruby 字符串对象获取一个对应的符号。</p>
+<h4><code>mrb_intern_lit(mrb_state*,const char*)</code></h4>
+<p>从一个 C 字符串字面量中获取一个对应的符号，第二个参数一定要是 C 字符串字面量才行，否则就会产生一个编译错误。也因为是字面量，所以这个函数并不会拷贝这个 C 字符串。</p>
+<h4><code>mrb_sym mrb_intern_check(mrb_state*,const char*,size_t)</code></h4>
+<p>用一个字符串获取一个对应的符号，如果该符号还没有被注册，那就返回<code>0</code>。
+这个函数还有两个变体，一个是
+<code>mrb_intern_check_str()</code>用于 Ruby 字符串对象；
+还有一个<code>mrb_intern_check_cstr()</code>用于 C 字符串。</p>
+<h4><code>const char *mrb_sym_name(mrb_state*,mrb_sym)</code></h4>
+<p>获取一个符号的 C 字符串表示。</p>
+<h4><code>const char *mrb_sym_name_len(mrb_state*,mrb_sym,mrb_int*)</code></h4>
+<p>获取一个符号的字符串表示以及其长度。</p>
+<h2>预分配符号(mruby 3.x 特性)</h2>
+<p>为了节省 RAM，<code>mruby</code> 可以在编译时就分配一些符号，你可以通过包含<code>mruby/presym.h</code>并使用如下的宏来获得预分配的符号。</p>
+<ul>
+<li><code>MRB_SYM(xor)</code>    //=&gt; xor    (和名称完全一致的符号)</li>
+<li><code>MRB_SYM_B(xor)</code>  //=&gt; xor!   (带叹号，用于方法名)</li>
+<li><code>MRB_SYM_Q(xor)</code>  //=&gt; xor?   (带问号，用于方法名)</li>
+<li><code>MRB_SYM_E(xor)</code>  //=&gt; xor=   (带等号，用于方法名)</li>
+<li><code>MRB_CVSYM(xor)</code>  //=&gt; @@xor  (带两个@前缀，用于类变量)</li>
+<li><code>MRB_IVSYM(xor)</code>  //=&gt; @xor   (带一个@前缀，用于实例变量)</li>
+<li><code>MRB_OPSYM(xor)</code>  //=&gt; ^      (由名称转换而来的操作符)</li>
+</ul>
+<p>对于 <code>MRB_OPSYM()</code>, 请指定与运算符对应的名称 (参见 <code>lib/mruby/presym.rb</code> 中的 <code>MRuby::Presym::OPERATORS</code> 来获取名称)。
+除此之外，只描述符号名称，不要包括前缀以及后缀的标点符号。</p>
+<p>这些宏在编译时被转换成静态的符号 ID ，除非预分配符号被<code>conf.disable_presym</code>禁用。在这种情况下，这些宏会被扩展成<code>mrb_intern_lit</code>调用，因此 mruby 的状态参数是必须的，而上面的宏假定这个状态参数在当前上下文叫作<code>mrb</code>，如果不是的话，你就要使用后缀为<code>_2</code>的宏，如<code>MRB_SYM_2</code>来传入<code>mrb_state*</code>参数。</p>
+<h3>禁用预分配符号</h3>
+<p>你可以通过在配置文件中调用<code>conf.disable_presym</code>来禁用预分配符号特性。</p>
+				</div>
+			</div>
+		</div>
+		<div class="goog-te-spinner-pos">
+			<div class="goog-te-spinner-animation">
+				<svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px"
+				height="96px" viewbox="0 0 66 66">
+					<circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round"
+					cx="33" cy="33" r="30">
+					</circle>
+				</svg>
+			</div>
+		</div>
+	</body>
+
+</html>
